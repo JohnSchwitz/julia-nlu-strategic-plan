@@ -1,0 +1,6 @@
+# Julia project specific
+/Manifest.toml
+*.log
+
+# VS Code
+.vscode/
