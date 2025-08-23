@@ -2,3 +2,9 @@ key,value
 dev_productivity_factor,1.0
 marketing_productivity_factor,1.0
 intern_productivity_factor,0.2
+Nebula_12M_Compound_Growth,2.0
+Nebula_24M_Compound_Growth,1.5
+Disclosure_12M_Compound_Growth,1.5
+Disclosure_24M_Compound_Growth,1.5
+Lingua_12M_Compound_Growth,2.0
+Lingua_24M_Compound_Growth,2.0
