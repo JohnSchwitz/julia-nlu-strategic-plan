@@ -279,13 +279,31 @@ function generate_distribution_plots(prob_parameters::Dict{String,Dict{String,Fl
     customer_draws = [rand(poisson_customers) for _ in 1:10]
     purchase_draws = [rand(beta_purchase) for _ in 1:10]
     churn_draws = [rand(beta_churn) for _ in 1:10]
-    p1 = plot(poisson_customers, (poisson_customers.λ-40):(poisson_customers.λ+40), title="Customer Acquisition\nPoisson(λ=$(round(Int,poisson_customers.λ)))", xlabel="New Customers", ylabel="Probability", lw=3, legend=false)
-    scatter!(p1, customer_draws, [pdf(poisson_customers, x) for x in customer_draws], ms=5, color=:red)
-    p2 = plot(beta_purchase, 0:0.01:1, title="Purchase Rate\nBeta(α=$(beta_purchase.α), β=$(beta_purchase.β))", xlabel="Purchase Rate", ylabel="Density", lw=3, color=:green, legend=false)
-    scatter!(p2, purchase_draws, [pdf(beta_purchase, x) for x in purchase_draws], ms=5, color=:red)
-    p3 = plot(beta_churn, 0:0.01:1, title="Annual Churn Rate\nBeta(α=$(beta_churn.α), β=$(beta_churn.β))", xlabel="Annual Churn Rate", ylabel="Density", lw=3, color=:purple, legend=false)
-    scatter!(p3, churn_draws, [pdf(beta_churn, x) for x in churn_draws], ms=5, color=:red)
-    display(plot(p1, p2, p3, layout=(1, 3), size=(1200, 350), plot_title="Key Revenue Driver Distributions with 10 Sample Draws (Nebula-NLU)"))
+
+    quantiles = [0.05, 0.25, 0.5, 0.75, 0.95]
+    quantile_styles = [:dot, :dashdot, :solid, :dashdot, :dot]
+    quantile_colors = [:black, :gray, :red, :gray, :black]
+    quantile_labels = ["5%% Quantile", "25% Quantile", "50% Quantile (Median)", "75% Quantile", "95% Quantile"]
+
+    p1 = plot(poisson_customers, (poisson_customers.λ-40):(poisson_customers.λ+40), title="Customer Acquisition\nPoisson(λ=$(round(Int,poisson_customers.λ)))", xlabel="New Customers", ylabel="Probability", lw=3, legend=:topleft, label="Poisson PDF")
+    for (q, style, color, label) in zip(quantiles, quantile_styles, quantile_colors, quantile_labels)
+        vline!(p1, [quantile(poisson_customers, q)], linestyle=style, color=color, label=label)
+    end
+    scatter!(p1, customer_draws, [pdf(poisson_customers, x) for x in customer_draws], ms=5, color=:red, label="Sample Draws")
+
+    p2 = plot(beta_purchase, 0:0.01:1, title="Purchase Rate\nBeta(α=$(beta_purchase.α), β=$(beta_purchase.β))", xlabel="Purchase Rate", ylabel="Density", lw=3, color=:green, legend=:top, label="Beta PDF")
+    for (q, style, color, label) in zip(quantiles, quantile_styles, quantile_colors, quantile_labels)
+        vline!(p2, [quantile(beta_purchase, q)], linestyle=style, color=color, label=label)
+    end
+    scatter!(p2, purchase_draws, [pdf(beta_purchase, x) for x in purchase_draws], ms=5, color=:red, label="Sample Draws")
+
+    p3 = plot(beta_churn, 0:0.01:1, title="Annual Churn Rate\nBeta(α=$(beta_churn.α), β=$(beta_churn.β))", xlabel="Annual Churn Rate", ylabel="Density", lw=3, color=:purple, legend=:top, label="Beta PDF")
+    for (q, style, color, label) in zip(quantiles, quantile_styles, quantile_colors, quantile_labels)
+        vline!(p3, [quantile(beta_churn, q)], linestyle=style, color=color, label=label)
+    end
+    scatter!(p3, churn_draws, [pdf(beta_churn, x) for x in churn_draws], ms=5, color=:red, label="Sample Draws")
+
+    display(plot(p1, p2, p3, layout=(1, 3), size=(1800, 500), plot_title="Key Revenue Driver Distributions with 10 Sample Draws (Nebula-NLU)"))
 end
 
 function generate_revenue_variability_plot(nebula_f, disclosure_f, lingua_f, prob_parameters)
